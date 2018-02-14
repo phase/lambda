@@ -1,0 +1,10 @@
+0 := \f.\x.x
+1 := \f.\x.f x
+2 := \f.\x.f (f x)
+
+True  := \x.\y.x
+False := \x.\y.y
+And := \p.\q. p q p
+Or  := \p.\q. p p q
+Not := \p.\q. \x.\y.x \x.\y.y
+IfThenElse := \p.\a.\b.p a b
