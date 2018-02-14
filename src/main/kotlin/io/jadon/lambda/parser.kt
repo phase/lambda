@@ -147,6 +147,20 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
                 }
                 is Either.Right<Error> -> result
             }
+        } else if (tokens.size >= 2) {
+            val function = tokens[0].value
+            val rest = tokens.subList(1, tokens.size)
+            val result = parse(rest, env)
+            return when(result) {
+                is Either.Left<Pair<Expression, Environment>> -> {
+                    val r = result.value
+                    val argument = r.first
+                    val env = r.second
+                    val application = Application(Variable(function), argument)
+                    Either.Left(Pair(application, env))
+                }
+                is Either.Right<Error> -> result
+            }
         } else {
             // lone identifier
             return Either.Left(Pair(Variable(tokens[0].value), env))
