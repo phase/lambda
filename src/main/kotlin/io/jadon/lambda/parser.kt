@@ -143,7 +143,14 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
                     val r = result.value
                     val argument = r.first
                     val env = r.second
-                    Either.Left(Pair(Application(Variable(function), argument), env))
+                    val application = Application(Variable(function), argument)
+                    if (indexOfCloseParen + 1 < tokens.size) {
+                        // there are tokens after the close paren
+                        val pastParen = tokens.subList(indexOfCloseParen + 1, tokens.size)
+                        parse(pastParen, env, application)
+                    } else {
+                        Either.Left(Pair(application, env))
+                    }
                 }
                 is Either.Right<Error> -> result
             }
@@ -151,7 +158,7 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
             val function = tokens[0].value
             val rest = tokens.subList(1, tokens.size)
             val result = parse(rest, env)
-            return when(result) {
+            return when (result) {
                 is Either.Left<Pair<Expression, Environment>> -> {
                     val r = result.value
                     val argument = r.first

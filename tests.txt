@@ -8,3 +8,33 @@ And := \p.\q. p q p
 Or  := \p.\q. p p q
 Not := \p.\q. \x.\y.x \x.\y.y
 IfThenElse := \p.\a.\b.p a b
+
+SUCC := \n.\f.\x.f (n f x)
+SUCC=Abstraction(
+    argument=n,
+    value=Abstraction(
+        argument=f,
+        value=Abstraction(
+            argument=x,
+            value=Application(
+                function=f,
+                argument=Application(
+                    function=Application(
+                        function=n,
+                        argument=f),
+                    argument=x)))))
+
+PLUS := \m.\n.m SUCC n
+MULT := \m.\n.m (PLUS n) 0
+MULT=Abstraction(
+    argument=m,
+    value=Abstraction(
+        argument=n,
+        value=Application(
+            function=Application(
+                function=m,
+                argument=Application(
+                    function=PLUS,
+                    argument=n)
+                ),
+            argument=0)))
