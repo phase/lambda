@@ -17,6 +17,13 @@ fun main(args: Array<String>) {
                 val r = result.value
                 println("${r.third}: ${r.first}")
                 println(r.second)
+                if (r.third == ResultType.EXPRESSION) {
+                    val expression = r.first
+                    val renamed = rename(expression).first
+                    println("Renamed: $renamed")
+                    val filled = fillInFreeVariables(renamed, r.second)
+                    println("Filled: ${filled.first}")
+                }
             }
             is Either.Right<Error> -> {
                 println(result.value)
