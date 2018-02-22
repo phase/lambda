@@ -13,10 +13,10 @@ fun main(args: Array<String>) {
         }
         val result = parse(tokens, env)
         when (result) {
-            is Either.Left<Pair<Expression, Environment>> -> {
-                val pair = result.value
-                println(pair.first)
-                println(pair.second)
+            is Either.Left<Triple<Expression, Environment, ResultType>> -> {
+                val r = result.value
+                println("${r.third}: ${r.first}")
+                println(r.second)
             }
             is Either.Right<Error> -> {
                 println(result.value)

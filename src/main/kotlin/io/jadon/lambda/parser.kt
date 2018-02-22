@@ -73,19 +73,24 @@ sealed class Either<out A, out B> {
 
 typealias Error = String
 
+enum class ResultType {
+    ASSIGNMENT,
+    EXPRESSION
+}
+
 //temp
 private var parseDepth = 0
 
-fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = null): Either<Pair<Expression, Environment>, Error> {
+fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = null): Either<Triple<Expression, Environment, ResultType>, Error> {
     println("Parse Depth #${parseDepth++}: $tokens")
     if (tokens.size >= 2 && tokens[0].type == Token.TokenType.IDENTIFIER && tokens[1].type == Token.TokenType.ASSIGNMENT) {
         val varName = tokens[0].value
         val rest = tokens.subList(2, tokens.size)
         val result = parse(rest, env)
         return when (result) {
-            is Either.Left<Pair<Expression, Environment>> -> {
+            is Either.Left<Triple<Expression, Environment, ResultType>> -> {
                 result.value.second.variables[Variable(varName)] = result.value.first
-                result
+                Either.Left(Triple(result.value.first, result.value.second, ResultType.ASSIGNMENT))
             }
             is Either.Right<Error> -> result
         }
@@ -95,11 +100,11 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
             val rest = tokens.subList(3, tokens.size)
             val result = parse(rest, env)
             return when (result) {
-                is Either.Left<Pair<Expression, Environment>> -> {
+                is Either.Left<Triple<Expression, Environment, ResultType>> -> {
                     val r = result.value
                     val abstraction = Abstraction(ident.value, r.first)
                     val env = r.second
-                    Either.Left<Pair<Expression, Environment>>(Pair(abstraction, env))
+                    Either.Left<Triple<Expression, Environment, ResultType>>(Triple(abstraction, env, ResultType.EXPRESSION))
                 }
                 is Either.Right<Error> -> result
             }
@@ -113,7 +118,7 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
                 val rest = tokens.subList(1, tokens.size)
                 parse(rest, env, application)
             } else {
-                Either.Left(Pair(application, env))
+                Either.Left(Triple(application, env, ResultType.EXPRESSION))
             }
         } else if (tokens.size >= 2 && tokens[1].type == Token.TokenType.IDENTIFIER) {
             val function = tokens[0].value
@@ -123,7 +128,7 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
                 val rest = tokens.subList(2, tokens.size)
                 parse(rest, env, application)
             } else {
-                Either.Left(Pair(application, env))
+                Either.Left(Triple(application, env, ResultType.EXPRESSION))
             }
         } else if (tokens.size >= 2 && tokens[1].type == Token.TokenType.OPEN_PAREN) {
             val function = tokens[0].value
@@ -139,7 +144,7 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
             val rest = tokens.subList(2, indexOfCloseParen)
             val result = parse(rest, env)
             return when (result) {
-                is Either.Left<Pair<Expression, Environment>> -> {
+                is Either.Left<Triple<Expression, Environment, ResultType>> -> {
                     val r = result.value
                     val argument = r.first
                     val env = r.second
@@ -149,7 +154,7 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
                         val pastParen = tokens.subList(indexOfCloseParen + 1, tokens.size)
                         parse(pastParen, env, application)
                     } else {
-                        Either.Left(Pair(application, env))
+                        Either.Left(Triple(application, env, ResultType.EXPRESSION))
                     }
                 }
                 is Either.Right<Error> -> result
@@ -159,18 +164,18 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
             val rest = tokens.subList(1, tokens.size)
             val result = parse(rest, env)
             return when (result) {
-                is Either.Left<Pair<Expression, Environment>> -> {
+                is Either.Left<Triple<Expression, Environment, ResultType>> -> {
                     val r = result.value
                     val argument = r.first
                     val env = r.second
                     val application = Application(Variable(function), argument)
-                    Either.Left(Pair(application, env))
+                    Either.Left(Triple(application, env, ResultType.EXPRESSION))
                 }
                 is Either.Right<Error> -> result
             }
         } else {
             // lone identifier
-            return Either.Left(Pair(Variable(tokens[0].value), env))
+            return Either.Left(Triple(Variable(tokens[0].value), env, ResultType.EXPRESSION))
         }
     }
     return Either.Right("Unknown")
