@@ -23,6 +23,8 @@ fun main(args: Array<String>) {
                     println("Renamed: $renamed")
                     val filled = fillInFreeVariables(renamed, r.second)
                     println("Filled: ${filled.first}")
+                    val reduced = betaReduction(filled.first)
+                    println("Reduced: $reduced")
                 }
             }
             is Either.Right<Error> -> {

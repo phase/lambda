@@ -48,3 +48,40 @@ fun fillInFreeVariables(expression: Expression, env: Environment): Pair<Expressi
         else -> Pair(expression, env)
     }
 }
+
+fun betaReduction(e: Expression): Expression {
+    return when (e) {
+        is Application -> {
+            val f = betaReduction(e.function)
+            val a = betaReduction(e.argument)
+            if (f is Abstraction) {
+                betaReduction(replace(f.value, f.argument, a))
+            } else {
+                e
+            }
+        }
+        else -> e
+    }
+}
+
+fun replace(origin: Expression, name: String, replacement: Expression): Expression {
+    return when (origin) {
+        is Variable -> {
+            if (origin.argument == name) {
+                replacement
+            } else {
+                origin
+            }
+        }
+        is Abstraction -> {
+            val value = betaReduction(replace(origin.value, name, replacement))
+            Abstraction(origin.argument, value)
+        }
+        is Application -> {
+            val function = betaReduction(replace(origin.function, name, replacement))
+            val argument = betaReduction(replace(origin.argument, name, replacement))
+            Application(function, argument)
+        }
+        else -> origin
+    }
+}
