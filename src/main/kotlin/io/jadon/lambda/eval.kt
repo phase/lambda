@@ -1,5 +1,6 @@
 package io.jadon.lambda
 
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 fun rename(expression: Expression, names: MutableMap<String, String> = mutableMapOf()): Pair<Expression, MutableMap<String, String>> {

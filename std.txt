@@ -1,0 +1,27 @@
+0 := \f.\x.x
+1 := \f.\x.f x
+2 := \f.\x.f (f x)
+3 := \f.\x.f (f (f x))
+4 := \f.\x.f (f (f (f x)))
+5 := \f.\x.f (f (f (f (f x))))
+6 := \f666.\x540.f666 (f666 (f666 (f666 (f666 (f666 x540)))))
+
+true  := \x.\y.x
+false := \x.\y.y
+and := \p.\q. p q p
+or  := \p.\q. p p q
+not := \p.p false true
+if := \p.\a.\b.p a b
+isZero := \n.n (\x.false) true
+
+inc := \n.\f.\x.f (n f x)
+dec := \n.\f.\x.n (\g.\h.h (g f)) (\u.x) (\u.u)
+
+plus := \m.\n.m inc n
+mult := \m.\n.m (+ n) 0
+sub  := \m.\n.n (dec m)
+
+Y := \f.(\x.f (x x)) (\x.f (x x))
+
+G := \r.\x.((if (isZero x) 1) ((mult n) ((r r) (dec n))))
+fact := Y G

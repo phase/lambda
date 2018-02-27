@@ -132,12 +132,18 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
             }
         } else if (tokens.size >= 2 && tokens[1].type == Token.TokenType.OPEN_PAREN) {
             val function = tokens[0].value
-            var indexOfCloseParen = -1
+            var depth = -1
+            val indexMap = mutableMapOf<Int, Int>()
             tokens.forEachIndexed { index, token ->
                 if (token.type == Token.TokenType.CLOSE_PAREN) {
-                    indexOfCloseParen = index
+                    if (!indexMap.containsKey(depth))
+                        indexMap[depth] = index
+                    depth--
+                } else if (token.type == Token.TokenType.OPEN_PAREN) {
+                    depth++
                 }
             }
+            val indexOfCloseParen = indexMap[0] ?: -1
             if (indexOfCloseParen < 0) {
                 return Either.Right("Open parenthesis found without a closing one.")
             }
@@ -176,6 +182,45 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
         } else {
             // lone identifier
             return Either.Left(Triple(Variable(tokens[0].value), env, ResultType.EXPRESSION))
+        }
+    } else if (tokens.size > 2 && tokens[0].type == Token.TokenType.OPEN_PAREN) {
+        var depth = -1
+        val indexMap = mutableMapOf<Int, Int>()
+        tokens.forEachIndexed { index, token ->
+            if (token.type == Token.TokenType.CLOSE_PAREN) {
+                if (!indexMap.containsKey(depth))
+                    indexMap[depth] = index
+                depth--
+            } else if (token.type == Token.TokenType.OPEN_PAREN) {
+                depth++
+            }
+        }
+        val indexOfCloseParen = indexMap[0] ?: -1
+        println("$indexMap")
+        if (indexOfCloseParen < 0) {
+            return Either.Right("Open parenthesis found without a closing one.")
+        }
+        val rest = tokens.subList(1, indexOfCloseParen)
+        val result = parse(rest, env)
+        if (indexOfCloseParen + 1 < tokens.size) {
+            // there are tokens after the close paren
+            val pastParen = tokens.subList(indexOfCloseParen + 1, tokens.size)
+            return when (result) {
+                is Either.Left -> {
+                    val ppResult = parse(pastParen, env)
+                    when (ppResult) {
+                        is Either.Left -> {
+                            val ppExp = ppResult.value.first
+                            val application = Application(result.value.first, ppExp)
+                            Either.Left(Triple(application, env, ResultType.EXPRESSION))
+                        }
+                        is Either.Right -> ppResult
+                    }
+                }
+                is Either.Right -> result
+            }
+        } else {
+            return result
         }
     }
     return Either.Right("Unknown")

@@ -7,6 +7,20 @@ fun main(args: Array<String>) {
         print(">> ")
         val line = readLine() ?: ""
         if (line == "q") break
+        else if (line.startsWith("import ")) {
+            val fileName = line.split("import ")[1] + ".txt"
+            val importedModule = Module.getModule(fileName)
+            when (importedModule) {
+                is Either.Left -> {
+                    val module = importedModule.value
+                    env.variables.putAll(module.environment.variables)
+                }
+                is Either.Right -> {
+                    println("Error: ${importedModule.value}")
+                }
+            }
+            continue
+        }
         val tokens = tokenize(line)
         tokens.forEach {
             println("${it.type}=${it.value}")
