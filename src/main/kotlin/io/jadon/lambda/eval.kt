@@ -1,6 +1,5 @@
 package io.jadon.lambda
 
-import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 fun rename(expression: Expression, names: MutableMap<String, String> = mutableMapOf()): Pair<Expression, MutableMap<String, String>> {
@@ -18,9 +17,9 @@ fun rename(expression: Expression, names: MutableMap<String, String> = mutableMa
             val argument = rename(expression.argument, function.second)
             Pair(Application(function.first, argument.first), argument.second)
         }
-        is Variable -> {
+        is IdentifierExpression -> {
             if (names.containsKey(expression.argument)) {
-                Pair(Variable(names[expression.argument]!!), names)
+                Pair(IdentifierExpression(names[expression.argument]!!), names)
             } else {
                 Pair(expression, names)
             }
@@ -41,7 +40,7 @@ fun fillInFreeVariables(expression: Expression, env: Environment): Pair<Expressi
             val application = Application(function, argument)
             Pair(application, env)
         }
-        is Variable -> {
+        is IdentifierExpression -> {
             Pair(if (env.variables.containsKey(expression))
                 fillInFreeVariables(rename(env.variables[expression]!!).first, env).first
             else expression, env)
@@ -67,7 +66,7 @@ fun betaReduction(e: Expression): Expression {
 
 fun replace(origin: Expression, name: String, replacement: Expression): Expression {
     return when (origin) {
-        is Variable -> {
+        is IdentifierExpression -> {
             if (origin.argument == name) {
                 replacement
             } else {

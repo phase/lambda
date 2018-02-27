@@ -48,11 +48,31 @@ data class Abstraction(val argument: String, val value: Expression) : Expression
     override fun toString(): String = "\\$argument.$value"
 }
 
-data class Variable(val argument: String) : Expression {
+data class IdentifierExpression(val argument: String) : Expression {
     override fun toString(): String = argument
+}
+
+data class Variable(val name: String, val type: Type) {
+    override fun toString(): String = "$name : $type"
 }
 
 class Environment {
     val variables = mutableMapOf<Variable, Expression>()
     override fun toString(): String = variables.toString()
+}
+
+// types
+
+interface Type
+
+data class PrimitiveType(val name: String) : Type {
+    override fun toString(): String = name
+}
+
+data class FunctionType(val a: Type, val b: Type) : Type {
+    override fun toString(): String = "$a -> $b"
+}
+
+data class PolyType(val typeVariable: String, val enclosingType: Type) : Type {
+    override fun toString(): String = "/$typeVariable.$enclosingType"
 }
