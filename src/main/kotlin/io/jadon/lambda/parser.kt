@@ -89,7 +89,9 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
         val result = parse(rest, env)
         return when (result) {
             is Either.Left<Triple<Expression, Environment, ResultType>> -> {
-                result.value.second.variables[Variable(varName, Untyped)] = result.value.first
+                val exp = result.value.first
+                val type = infer(exp, env)
+                result.value.second.variables[Variable(varName, type)] = exp
                 Either.Left(Triple(result.value.first, result.value.second, ResultType.ASSIGNMENT))
             }
             is Either.Right<Error> -> result

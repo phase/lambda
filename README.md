@@ -1,8 +1,15 @@
 # Lambda Calculus Interpreter
 
-It is currently untyped. It may get types in the future.
+<s>It is currently untyped. It may get types in the future.</s>
+
+Currently in the process of getting types. (System F; Polymorphic Lambda Calculus) 
 
 Here's a preview of what is currently supported:
+
+```
+>> 0 := \f.\x.x
+0 : /a./b./c./d.((a -> b) -> ((c -> d) -> (c -> d))) = \f.\x.x
+```
 
 ```
 0 := \f.\x.x

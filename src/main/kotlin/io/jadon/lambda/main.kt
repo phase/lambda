@@ -1,7 +1,7 @@
 package io.jadon.lambda
 
 fun main(args: Array<String>) {
-    println("Untyped Lambda Calculus Interpreter")
+    println("Polymorphic Lambda Calculus Interpreter")
     val env = Environment()
     while (true) {
         print(">> ")
@@ -39,6 +39,10 @@ fun main(args: Array<String>) {
                     println("Filled: ${filled.first}")
                     val reduced = betaReduction(filled.first)
                     println("Reduced: $reduced")
+
+                    // TODO not this
+                    charIndex = 0
+                    charWraps = 0
                     val type = infer(reduced, env)
                     println("Type: $type")
                 }
