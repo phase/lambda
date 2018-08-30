@@ -13,6 +13,7 @@ class Module(val name: String, val environment: Environment = Environment()) {
             file.readLines().forEach {
                 if (it.isNotEmpty()) {
                     val tokens = tokenize(it)
+                    parseDepth = 0
                     val result = parse(tokens, env)
                     when (result) {
                         is Either.Left -> {
@@ -58,12 +59,16 @@ data class Variable(val name: String, val type: Type) {
 
 class Environment {
     val variables = mutableMapOf<Variable, Expression>()
-    override fun toString(): String = variables.toString()
+    override fun toString(): String = "env:\n${variables.map { "${it.key} = ${it.value}" }.joinToString(separator = "") { "  $it\n" }}"
 }
 
 // types
 
 interface Type
+
+object Untyped : Type {
+    override fun toString(): String = "??"
+}
 
 data class PrimitiveType(val name: String) : Type {
     override fun toString(): String = name

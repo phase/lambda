@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
         }
         val tokens = tokenize(line)
         tokens.forEach {
-            println("${it.type}=${it.value}")
+            println("${it.type} = ${it.value}")
         }
         val result = parse(tokens, env)
         when (result) {

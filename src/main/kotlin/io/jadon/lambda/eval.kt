@@ -41,8 +41,8 @@ fun fillInFreeVariables(expression: Expression, env: Environment): Pair<Expressi
             Pair(application, env)
         }
         is IdentifierExpression -> {
-            Pair(if (env.variables.containsKey(expression))
-                fillInFreeVariables(rename(env.variables[expression]!!).first, env).first
+            Pair(if (env.variables.keys.map { it.name }.contains(expression.argument))
+                fillInFreeVariables(rename(env.variables.filter { it.key.name == expression.argument }.entries.first().value).first, env).first
             else expression, env)
         }
         else -> Pair(expression, env)
