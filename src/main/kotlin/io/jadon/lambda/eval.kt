@@ -17,14 +17,13 @@ fun rename(expression: Expression, names: MutableMap<String, String> = mutableMa
             val argument = rename(expression.argument, function.second)
             Pair(Application(function.first, argument.first), argument.second)
         }
-        is IdentifierExpression -> {
+        is Term -> {
             if (names.containsKey(expression.argument)) {
-                Pair(IdentifierExpression(names[expression.argument]!!), names)
+                Pair(Term(names[expression.argument]!!), names)
             } else {
                 Pair(expression, names)
             }
         }
-        else -> Pair(expression, names)
     }
 }
 
@@ -40,12 +39,11 @@ fun fillInFreeVariables(expression: Expression, env: Environment): Pair<Expressi
             val application = Application(function, argument)
             Pair(application, env)
         }
-        is IdentifierExpression -> {
+        is Term -> {
             Pair(if (env.variables.keys.map { it.name }.contains(expression.argument))
                 fillInFreeVariables(rename(env.variables.filter { it.key.name == expression.argument }.entries.first().value).first, env).first
             else expression, env)
         }
-        else -> Pair(expression, env)
     }
 }
 
@@ -66,7 +64,7 @@ fun betaReduction(e: Expression): Expression {
 
 fun replace(origin: Expression, name: String, replacement: Expression): Expression {
     return when (origin) {
-        is IdentifierExpression -> {
+        is Term -> {
             if (origin.argument == name) {
                 replacement
             } else {
@@ -82,6 +80,5 @@ fun replace(origin: Expression, name: String, replacement: Expression): Expressi
             val argument = betaReduction(replace(origin.argument, name, replacement))
             Application(function, argument)
         }
-        else -> origin
     }
 }

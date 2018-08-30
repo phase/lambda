@@ -113,7 +113,7 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
         }
     } else if (tokens.isNotEmpty() && tokens[0].type == Token.TokenType.IDENTIFIER) {
         if (lastExpression != null) {
-            val application = Application(lastExpression, IdentifierExpression(tokens[0].value))
+            val application = Application(lastExpression, Term(tokens[0].value))
             return if (tokens.size > 1) {
                 val rest = tokens.subList(1, tokens.size)
                 parse(rest, env, application)
@@ -122,8 +122,8 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
             }
         } else if (tokens.size >= 2 && tokens[1].type == Token.TokenType.IDENTIFIER) {
             val function = tokens[0].value
-            val argument = IdentifierExpression(tokens[1].value)
-            val application = Application(IdentifierExpression(function), argument)
+            val argument = Term(tokens[1].value)
+            val application = Application(Term(function), argument)
             return if (tokens.size > 2) {
                 val rest = tokens.subList(2, tokens.size)
                 parse(rest, env, application)
@@ -154,7 +154,7 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
                     val r = result.value
                     val argument = r.first
                     val env = r.second
-                    val application = Application(IdentifierExpression(function), argument)
+                    val application = Application(Term(function), argument)
                     if (indexOfCloseParen + 1 < tokens.size) {
                         // there are tokens after the close paren
                         val pastParen = tokens.subList(indexOfCloseParen + 1, tokens.size)
@@ -174,14 +174,14 @@ fun parse(tokens: List<Token>, env: Environment, lastExpression: Expression? = n
                     val r = result.value
                     val argument = r.first
                     val env = r.second
-                    val application = Application(IdentifierExpression(function), argument)
+                    val application = Application(Term(function), argument)
                     Either.Left(Triple(application, env, ResultType.EXPRESSION))
                 }
                 is Either.Right<Error> -> result
             }
         } else {
             // lone identifier
-            return Either.Left(Triple(IdentifierExpression(tokens[0].value), env, ResultType.EXPRESSION))
+            return Either.Left(Triple(Term(tokens[0].value), env, ResultType.EXPRESSION))
         }
     } else if (tokens.size > 2 && tokens[0].type == Token.TokenType.OPEN_PAREN) {
         var depth = -1

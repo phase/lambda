@@ -39,6 +39,8 @@ fun main(args: Array<String>) {
                     println("Filled: ${filled.first}")
                     val reduced = betaReduction(filled.first)
                     println("Reduced: $reduced")
+                    val type = infer(reduced, env)
+                    println("Type: $type")
                 }
             }
             is Either.Right<Error> -> {

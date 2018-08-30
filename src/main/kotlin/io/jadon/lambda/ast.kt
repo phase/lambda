@@ -39,17 +39,17 @@ class Module(val name: String, val environment: Environment = Environment()) {
     }
 }
 
-interface Expression
+sealed class Expression
 
-data class Application(val function: Expression, val argument: Expression) : Expression {
+data class Application(val function: Expression, val argument: Expression) : Expression() {
     override fun toString(): String = "($function $argument)"
 }
 
-data class Abstraction(val argument: String, val value: Expression) : Expression {
+data class Abstraction(val argument: String, val value: Expression) : Expression() {
     override fun toString(): String = "\\$argument.$value"
 }
 
-data class IdentifierExpression(val argument: String) : Expression {
+data class Term(val argument: String) : Expression() {
     override fun toString(): String = argument
 }
 
@@ -57,27 +57,31 @@ data class Variable(val name: String, val type: Type) {
     override fun toString(): String = "$name : $type"
 }
 
-class Environment {
-    val variables = mutableMapOf<Variable, Expression>()
+class Environment(val variables: MutableMap<Variable, Expression> = mutableMapOf()) {
+
+    constructor(env: Environment) : this(HashMap(env.variables))
+
     override fun toString(): String = "env:\n${variables.map { "${it.key} = ${it.value}" }.joinToString(separator = "") { "  $it\n" }}"
 }
 
 // types
 
-interface Type
+sealed class Type
 
-object Untyped : Type {
+object Untyped : Type() {
     override fun toString(): String = "??"
 }
 
-data class PrimitiveType(val name: String) : Type {
+data class NamedType(val name: String) : Type() {
     override fun toString(): String = name
 }
 
-data class FunctionType(val a: Type, val b: Type) : Type {
-    override fun toString(): String = "$a -> $b"
+data class FunctionType(val a: Type, val b: Type) : Type() {
+    override fun toString(): String = "($a -> $b)"
 }
 
-data class PolyType(val typeVariable: String, val enclosingType: Type) : Type {
+data class PolyType(val typeVariable: String, val enclosingType: Type) : Type() {
+    val namedType = NamedType(typeVariable)
+
     override fun toString(): String = "/$typeVariable.$enclosingType"
 }
